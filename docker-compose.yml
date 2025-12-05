@@ -1,0 +1,48 @@
+version: '3.8'
+
+services:
+  mongo:
+    image: mongo:latest
+    container_name: mongo
+    restart: always
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    networks:
+      - kanban-network
+
+  backend:
+    build: ./backend
+    container_name: backend
+    restart: always
+    ports:
+      - "5000:5000"
+    environment:
+      - MONGODB_URI=mongodb://mongo:27017/kanbanflow
+      - JWT_SECRET=your_super_secret_jwt_key
+      - FRONTEND_URL=http://frontend:3000
+    depends_on:
+      - mongo
+    networks:
+      - kanban-network
+
+  frontend:
+    build: ./frontend
+    container_name: frontend
+    restart: always
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    networks:
+      - kanban-network
+    environment:
+      - REACT_APP_API_URL=http://backend:5000
+
+networks:
+  kanban-network:
+    driver: bridge
+
+volumes:
+  mongo-data:
