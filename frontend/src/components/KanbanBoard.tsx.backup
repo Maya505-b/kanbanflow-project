@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { format } from 'date-fns';
-import { taskApi, Task as ApiTask } from '../services/api';
 
 interface Task {
   id: string;
@@ -48,81 +47,73 @@ const KanbanBoard: React.FC = () => {
     localStorage.setItem('darkMode', JSON.stringify(darkMode));
   }, [darkMode]);
 
-    useEffect(() => {
-    const loadTasks = async () => {
-      try {
-        // Essayer de charger depuis l'API
-        const tasks = await taskApi.getAll();
-        
-        // Répartir les tâches dans les bonnes colonnes
-        const newColumns = columns.map(col => ({
-          ...col,
-          tasks: tasks.filter(task => task.status === col.id)
-        }));
-        
-        setColumns(newColumns);
-        console.log('Tâches chargées depuis l\'API');
-      } catch (err) {
-        console.error('Erreur API, utilisation des données locales:', err);
-        
-        // Fallback aux données mockées si l'API échoue
-        const initialTasks: Task[] = [
-          {
-            id: 'task-1',
-            title: 'Déployer sur Docker',
-            description: 'Configurer les containers et docker-compose pour le déploiement',
-            priority: 'high',
-            labels: ['docker', 'devops', 'déploiement'],
-            status: 'todo',
-            assignee: 'Alex Martin',
-            dueDate: format(new Date(Date.now() + 86400000), 'dd/MM/yyyy'),
-            createdAt: format(new Date(), 'dd/MM/yyyy HH:mm')
-          },
-          {
-            id: 'task-2',
-            title: 'Développer interface utilisateur',
-            description: 'Créer les composants React avec TypeScript et tests unitaires',
-            priority: 'medium',
-            labels: ['frontend', 'react', 'typescript'],
-            status: 'inprogress',
-            assignee: 'Maya Dubois',
-            dueDate: format(new Date(Date.now() + 86400000 * 3), 'dd/MM/yyyy'),
-            createdAt: format(new Date(Date.now() - 86400000), 'dd/MM/yyyy HH:mm')
-          },
-          {
-            id: 'task-3',
-            title: 'Configurer base de données',
-            description: 'Mettre en place MongoDB avec les schémas et index',
-            priority: 'medium',
-            labels: ['database', 'mongodb'],
-            status: 'review',
-            assignee: 'Thomas Leroy',
-            dueDate: format(new Date(Date.now() + 86400000 * 2), 'dd/MM/yyyy'),
-            createdAt: format(new Date(Date.now() - 86400000 * 2), 'dd/MM/yyyy HH:mm')
-          },
-          {
-            id: 'task-4',
-            title: "Tests d'intégration",
-            description: "Valider le fonctionnement complet avec tests automatisés",
-            priority: 'low',
-            labels: ['testing', 'qa', 'automation'],
-            status: 'done',
-            assignee: 'Équipe QA',
-            dueDate: format(new Date(Date.now() - 86400000), 'dd/MM/yyyy'),
-            createdAt: format(new Date(Date.now() - 86400000 * 3), 'dd/MM/yyyy HH:mm')
-          },
-        ];
-
-        const newColumns = columns.map(col => ({
-          ...col,
-          tasks: initialTasks.filter(task => task.status === col.id)
-        }));
-
-        setColumns(newColumns);
+  useEffect(() => {
+    // Tâches initiales complètes avec toutes les informations
+    const initialTasks: Task[] = [
+      {
+        id: 'task-1',
+        title: 'Déployer sur Docker',
+        description: 'Configurer les containers et docker-compose pour le déploiement',
+        priority: 'high',
+        labels: ['docker', 'devops', 'déploiement'],
+        status: 'todo',
+        assignee: 'Alex Martin',
+        dueDate: format(new Date(Date.now() + 86400000), 'dd/MM/yyyy'),
+        createdAt: format(new Date(), 'dd/MM/yyyy HH:mm')
+      },
+      {
+        id: 'task-2',
+        title: 'Développer interface utilisateur',
+        description: 'Créer les composants React avec TypeScript et tests unitaires',
+        priority: 'medium',
+        labels: ['frontend', 'react', 'typescript'],
+        status: 'inprogress',
+        assignee: 'Maya Dubois',
+        dueDate: format(new Date(Date.now() + 86400000 * 3), 'dd/MM/yyyy'),
+        createdAt: format(new Date(Date.now() - 86400000), 'dd/MM/yyyy HH:mm')
+      },
+      {
+        id: 'task-3',
+        title: 'Configurer base de données',
+        description: 'Mettre en place MongoDB avec les schémas et index',
+        priority: 'medium',
+        labels: ['database', 'mongodb'],
+        status: 'review',
+        assignee: 'Thomas Leroy',
+        dueDate: format(new Date(Date.now() + 86400000 * 2), 'dd/MM/yyyy'),
+        createdAt: format(new Date(Date.now() - 86400000 * 2), 'dd/MM/yyyy HH:mm')
+      },
+      {
+        id: 'task-4',
+        title: 'Tests d\'intégration',
+        description: 'Valider le fonctionnement complet avec tests automatisés',
+        priority: 'low',
+        labels: ['testing', 'qa', 'automation'],
+        status: 'done',
+        assignee: 'Équipe QA',
+        dueDate: format(new Date(Date.now() - 86400000), 'dd/MM/yyyy'),
+        createdAt: format(new Date(Date.now() - 86400000 * 3), 'dd/MM/yyyy HH:mm')
+      },
+      {
+        id: 'task-5',
+        title: 'Documentation technique',
+        description: 'Rédiger la documentation API et guide d\'installation',
+        priority: 'medium',
+        labels: ['documentation', 'api'],
+        status: 'todo',
+        assignee: 'Sophie Bernard',
+        dueDate: format(new Date(Date.now() + 86400000 * 5), 'dd/MM/yyyy'),
+        createdAt: format(new Date(Date.now() - 86400000), 'dd/MM/yyyy HH:mm')
       }
-    };
-
-    loadTasks();
+    ];
+    
+    // Répartir les tâches dans les bonnes colonnes
+    const newColumns = columns.map(col => ({
+      ...col,
+      tasks: initialTasks.filter(task => task.status === col.id)
+    }));
+    
+    setColumns(newColumns);
   }, []);
 
   const handleAddTask = () => {
