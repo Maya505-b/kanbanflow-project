@@ -2,21 +2,24 @@ FROM node:18-alpine
 
 WORKDIR /app
 
-# Copier les fichiers de dépendances
+# 1. Copier les fichiers de configuration
 COPY package*.json ./
 COPY tsconfig.json ./
 
-# Installer les dépendances
-RUN npm ci --only=production
+# 2. Installer TOUTES les dépendances (dev inclus pour TypeScript)
+RUN npm ci
 
-# Copier le code source
+# 3. Copier le code source
 COPY . .
 
-# Compiler TypeScript
+# 4. Compiler TypeScript (nécessite typescript installé)
 RUN npm run build
 
-# Exposer le port
+# 5. Optionnel: Réinstaller seulement production pour image plus petite
+RUN npm ci --only=production
+
+# 6. Exposer le port
 EXPOSE 5000
 
-# Démarrer l'application
+# 7. Démarrer l'application
 CMD ["npm", "start"]
