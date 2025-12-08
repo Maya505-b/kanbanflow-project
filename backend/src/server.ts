@@ -16,7 +16,6 @@ const io = new Server(server, {
     credentials: true,
   },
 });
-
 // Middleware
 app.use(
   cors({
@@ -118,13 +117,19 @@ const MONGODB_URI =
   process.env.MONGODB_URI || "mongodb://localhost:27017/kanbanflow";
 const PORT = process.env.PORT || 5000;
 
-// Démarrer le serveur
-server.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+// Export app for testing
+export { app };
 
-  // Se connecter à MongoDB
-  mongoose
-    .connect(MONGODB_URI)
-    .then(() => console.log("Connected to MongoDB"))
-    .catch((error) => console.error("MongoDB connection error:", error));
-});
+// Démarrer le serveur seulement si pas en mode test 
+if (process.env.NODE_ENV !== 'test') {
+ server.listen(PORT, () => {
+   console.log(`Server running on port ${PORT}`);
+
+   // Se connecter à MongoDB
+   mongoose
+     .connect(MONGODB_URI)
+     .then(() => console.log("Connected to MongoDB"))
+     .catch((error) => console.error("MongoDB connection error:", error));
+  });
+}
+
