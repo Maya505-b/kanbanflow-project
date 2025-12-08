@@ -6,13 +6,13 @@ WORKDIR /app
 COPY package*.json ./
 
 # Installer toutes les dépendances (développement inclus)
-RUN npm i
+RUN ["npm", "i"]
 
 # Copier le code source
 COPY . .
 
 # Construire l'application
-RUN npm run build
+RUN ["npm" ,"run", "build"]
 
 # Étape de production
 FROM nginx:alpine
