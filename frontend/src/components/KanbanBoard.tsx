@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { format } from 'date-fns';
-import { taskApi, Task as ApiTask } from '../services/api';
+import { taskApi } from '../services/api';
 
 interface Task {
   id: string;
@@ -123,7 +123,7 @@ const KanbanBoard: React.FC = () => {
     };
 
     loadTasks();
-  }, []);
+  }, [columns, setColumns]);
 
   const handleAddTask = () => {
     if (!newTask.title?.trim()) return;
