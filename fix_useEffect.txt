@@ -1,0 +1,97 @@
+    useEffect(() => {
+    const loadTasks = async () => {
+      try {
+        console.log('Chargement des tâches depuis l\'API...');
+        const tasks = await taskApi.getAll();
+        console.log(`${tasks.length} tâches reçues de l'API`);
+
+        if (tasks.length > 0) {
+          // Crée de NOUVELLES colonnes (pas basées sur l'ancien state)
+          const newColumns = [
+            { id: 'todo', title: 'À faire', tasks: tasks.filter(task => task.status === 'todo') },
+            { id: 'inprogress', title: 'En cours', tasks: tasks.filter(task => task.status === 'inprogress') },
+            { id: 'review', title: 'En revue', tasks: tasks.filter(task => task.status === 'review') },
+            { id: 'done', title: 'Terminé', tasks: tasks.filter(task => task.status === 'done') }
+          ];
+          
+          setColumns(newColumns);
+          console.log('Colonnes mises à jour avec', tasks.length, 'tâches');
+        } else {
+          console.log('Aucune tâche dans l\'API, chargement données de démo');
+          loadDemoTasks();
+        }
+      } catch (err) {
+        console.error('Erreur API:', err);
+        loadDemoTasks();
+      }
+    };
+
+    const loadDemoTasks = () => {
+      const demoColumns = [
+        { 
+          id: 'todo', 
+          title: 'À faire', 
+          tasks: [{
+            id: 'task-1',
+            title: 'Présenter KanbanFlow',
+            description: 'Expliquer architecture et pipeline CI/CD',
+            priority: 'high',
+            labels: ['présentation', 'important'],
+            status: 'todo',
+            assignee: 'Maya',
+            dueDate: new Date().toLocaleDateString('fr-FR'),
+            createdAt: new Date().toISOString()
+          }]
+        },
+        { 
+          id: 'inprogress', 
+          title: 'En cours', 
+          tasks: [{
+            id: 'task-2',
+            title: 'Démontrer Docker Compose',
+            description: 'Montrer docker-compose up --build -d',
+            priority: 'high',
+            labels: ['docker', 'démo'],
+            status: 'inprogress',
+            assignee: 'Maya',
+            dueDate: new Date().toLocaleDateString('fr-FR'),
+            createdAt: new Date().toISOString()
+          }]
+        },
+        { 
+          id: 'review', 
+          title: 'En revue', 
+          tasks: [{
+            id: 'task-3',
+            title: 'Montrer les tests automatisés',
+            description: 'Pipeline GitHub Actions avec 12+ tests',
+            priority: 'medium',
+            labels: ['ci/cd', 'tests'],
+            status: 'review',
+            assignee: 'Maya',
+            dueDate: new Date().toLocaleDateString('fr-FR'),
+            createdAt: new Date().toISOString()
+          }]
+        },
+        { 
+          id: 'done', 
+          title: 'Terminé', 
+          tasks: [{
+            id: 'task-4',
+            title: 'Répondre aux questions',
+            description: 'Session Q&A technique',
+            priority: 'medium',
+            labels: ['présentation'],
+            status: 'done',
+            assignee: 'Maya',
+            dueDate: new Date().toLocaleDateString('fr-FR'),
+            createdAt: new Date().toISOString()
+          }]
+        }
+      ];
+      setColumns(demoColumns);
+      console.log('Données de démo chargées');
+    };
+
+    loadTasks();
+  }, []);

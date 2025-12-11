@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect,useRef } from 'react';
 import { format } from 'date-fns';
 import { taskApi } from '../services/api';
 
@@ -42,6 +42,7 @@ const KanbanBoard: React.FC = () => {
     status: 'todo'
   });
   const [showTaskForm, setShowTaskForm] = useState(false);
+  const initialLoad = useRef(true);
 
   // Sauvegarder le mode sombre dans localStorage
   useEffect(() => {
@@ -123,9 +124,10 @@ const KanbanBoard: React.FC = () => {
     };
 
     loadTasks();
-  }, [columns, setColumns]);
+  }, [columns]);
 
-  const handleAddTask = () => {
+  const handleAddTask = async () => {
+    console.log("handleAddTask called", newTask);
     if (!newTask.title?.trim()) return;
     
     const task: Task = {
@@ -137,14 +139,28 @@ const KanbanBoard: React.FC = () => {
       status: 'todo',
       dueDate: newTask.dueDate,
       assignee: newTask.assignee || 'Non assigné',
-      createdAt: format(new Date(), 'dd/MM/yyyy HH:mm')
+      createdAt: new Date().toISOString().split('T')[0]
     };
 
-    setColumns(prev => prev.map(col => 
-      col.id === 'todo' 
-        ? { ...col, tasks: [...col.tasks, task] }
-        : col
-    ));
+    try {
+      // 1. ENVOIE À L'API
+      await taskApi.create(task);  // ← APPEL API
+    
+      // 2. Mets à jour l'interface
+      setColumns(prev => prev.map(col =>
+        col.id === 'todo'
+          ? { ...col, tasks: [...col.tasks, task] }
+          : col
+      ));
+    } catch (error) {
+      console.error('Erreur création tâche:', error);
+      // Fallback : ajoute localement au moins
+      setColumns(prev => prev.map(col =>
+        col.id === 'todo'
+          ? { ...col, tasks: [...col.tasks, task] }
+          : col
+      ));
+    }
 
     // Réinitialiser le formulaire
     setNewTask({
@@ -190,23 +206,41 @@ ${col.tasks.map(t => `  [${t.priority}] ${t.title}
     URL.revokeObjectURL(url);
   };
 
-  const moveTask = (taskId: string, fromColumnId: string, toColumnId: string) => {
+  const moveTask = async (taskId: string, fromColumnId: string, toColumnId: string) => {
+  try {
+    // 1. Trouve la tâche
+    const taskToUpdate = columns
+      .find(col => col.id === fromColumnId)
+      ?.tasks.find(t => t.id === taskId);
+    
+    if (!taskToUpdate) return;
+
+    // 2. Met à jour l'API
+    await taskApi.update(taskId, {
+      ...taskToUpdate,
+      status: toColumnId as Task['status']
+    });
+
+    // 3. Met à jour l'interface
     setColumns(prev => {
       const newColumns = [...prev];
       const fromCol = newColumns.find(c => c.id === fromColumnId);
       const toCol = newColumns.find(c => c.id === toColumnId);
-      
+
       if (!fromCol || !toCol) return prev;
-      
+
       const taskIndex = fromCol.tasks.findIndex(t => t.id === taskId);
       if (taskIndex === -1) return prev;
-      
+
       const [task] = fromCol.tasks.splice(taskIndex, 1);
       const updatedTask = { ...task, status: toColumnId as Task['status'] };
       toCol.tasks.push(updatedTask);
-      
+
       return newColumns;
     });
+   } catch (error) {
+     console.error('Erreur déplacement tâche:', error);
+   }
   };
 
   // Styles cohérents
