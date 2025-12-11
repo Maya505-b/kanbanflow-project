@@ -42,7 +42,6 @@ const KanbanBoard: React.FC = () => {
     status: 'todo'
   });
   const [showTaskForm, setShowTaskForm] = useState(false);
-  const initialLoad = useRef(true);
 
   // Sauvegarder le mode sombre dans localStorage
   useEffect(() => {
